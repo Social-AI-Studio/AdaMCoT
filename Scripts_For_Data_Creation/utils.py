@@ -389,7 +389,7 @@ def async_request_questions(prompts, is_azure=False, is_gemini=False, enable_thi
         client = AzureOpenAI(
             api_version="2024-12-01-preview",
             api_key='',
-            azure_endpoint="https://alillm2.openai.azure.com",
+            azure_endpoint="",
         )
     elif is_gemini:
         client = openai.OpenAI(base_url='https://generativelanguage.googleapis.com/v1beta/openai/', api_key='')
