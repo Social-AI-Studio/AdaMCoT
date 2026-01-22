@@ -162,7 +162,7 @@ The scripts facilitate two major functionalities:
 
 ## Ablation Study (`Ablation_Study/`)
 
-- `Create_Bar_Figure_mTruth.py`  
+- `Create_Bar_Chart_mTruth.py`  
   Visualizes **path selection distribution** in the AdaMCoT framework.
 
 - `Logit_Lens_Analysis.py`  
