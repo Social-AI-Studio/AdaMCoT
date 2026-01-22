@@ -20,7 +20,7 @@ AdaMCoT proposes an adaptive multilingual Chain-of-Thought (CoT) framework that 
 │   └── ranking_instructions.py
 │
 ├── Ablation_Study/
-│   ├── Create_Bar_Figure_mTruth.py
+│   ├── Create_Bar_Chart_mTruth.py
 │   ├── Logit_Lens_Analysis.py
 │   └── UMAP_Analysis.py
 │
