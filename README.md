@@ -44,12 +44,6 @@ The scripts facilitate two major functionalities:
 - Constructing SFT or preference datasets based on these evaluations  
   (the **Infinity-Firefly / AdaMCoT-style** dataset generation pipeline is a prime example)
 
-### 2) LLM Evaluation
-
-- Running models against diverse benchmarks (CMMLU, CrossLogiQA, M-MMLU, AlpacaEval, AIME, BFCL, etc.)
-- Comparing model outputs, sometimes using an LLM for automated evaluation scoring
-- Analyzing cross-lingual consistency and performance
-
 ---
 
 ## Scripts For Data Creation (`Scripts_For_Data_Creation/`)
