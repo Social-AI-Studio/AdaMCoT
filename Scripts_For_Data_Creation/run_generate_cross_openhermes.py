@@ -15,7 +15,6 @@ import re
 from collections import Counter
 
 
-
 def write_jsonl(lines, data_path):
     with open(data_path, 'w', encoding='utf-8') as f:
         for l in lines:
@@ -77,6 +76,7 @@ def worker(gpu_id, prompts_chunk, return_dict, progress_queue, model_name):
     # Store the results in the shared dictionary
     return_dict[gpu_id] = generated_texts
 
+
 def generate_with_vllm_multiprocessing(prompts, model_name="meta-llama/Meta-Llama-3.1-8B-Instruct", num_gpus=8):
     """
     Generates text using the specified language model across multiple GPUs using multiprocessing.
@@ -135,6 +135,7 @@ def generate_with_vllm_multiprocessing(prompts, model_name="meta-llama/Meta-Llam
         all_generated_texts.extend(return_dict.get(gpu_id, []))
 
     return all_generated_texts
+
 
 def generate_crosslingual_openhermes():
     import multiprocessing
@@ -211,7 +212,7 @@ def generate_eval_crosslingual_openhermes():
     # Set the multiprocessing start method to 'spawn'
     multiprocessing.set_start_method('spawn', force=True)
 
-    eval_dataset = load_from_disk('/home/users/astar/ares/huangx2/scratch/huang_xin/crosslingual_openhermes_simpo_dataset/test')
+    eval_dataset = load_from_disk('/path/to/crosslingual_openhermes_simpo_dataset/test')
 
     prompts = list(eval_dataset['prompt'])
     chosen = list(eval_dataset['chosen'])
@@ -231,10 +232,10 @@ def generate_eval_crosslingual_openhermes():
             model1_answers.append(answer)
 
     # answers from gpt-aligned
-    model2_path = '/home/users/astar/ares/huangx2/scratch/SimPO/outputs/llama-3-8b-instruct-gpt-simpo-v2'
+    model2_path = '/path/to/outputs/llama-3-8b-instruct-gpt-simpo-v2'
     model2_answers = generate_with_vllm_multiprocessing(llama_prompts, model2_path)
 
-    model3_path = '/home/users/astar/ares/huangx2/scratch/SimPO/outputs/llama-3-8b-instruct-simpo-v2'
+    model3_path = '/path/to/outputs/llama-3-8b-instruct-simpo-v2'
     model3_answers = generate_with_vllm_multiprocessing(llama_prompts, model3_path)
 
     final_json = [{'instruction': prompts[i], 'answer_1': model1_answers[i], 'answer_2': model2_answers[i], 'answer_3': model3_answers[i]} for i in range(len(prompts))]
@@ -359,7 +360,7 @@ def generate_cmmlu_eval_model_responses():
 
     system_prompt = '你是一个人工智能助手。用户会给你一个问题。你的目标是尽可能地准确回答问题'
     all_prompts = []
-    model_paths = ['/home/users/astar/ares/huangx2/scratch/SimPO/outputs/llama3-8b-infinity-firefly-score-filter-sft-full']
+    model_paths = ['/path/to/outputs/llama3-8b-infinity-firefly-score-filter-sft-full']
     tokenizers = [AutoTokenizer.from_pretrained(model_path) for model_path in model_paths]
     questions = list(cmmlu['question'])
     choices = list(cmmlu['choices'])
@@ -420,7 +421,7 @@ def generate_crosslogiqa_eval_model_responses():
 
     system_prompt = 'You are a helpful assistant'
     all_prompts = []
-    model_paths = ['/home/users/astar/ares/huangx2/scratch/SimPO/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
+    model_paths = ['/path/to/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
     tokenizers = [AutoTokenizer.from_pretrained(model_path) for model_path in model_paths]
     questions = [e['English']['question'] for e in crosslogiqa] + [e['Chinese']['question'] for e in crosslogiqa] + [e['Indonesian']['question'] for e in crosslogiqa]
     choices = [e['English']['choices'] for e in crosslogiqa] + [e['Chinese']['choices'] for e in crosslogiqa] + [e['Indonesian']['choices'] for e in crosslogiqa]
@@ -480,7 +481,7 @@ def generate_crosslogiqa_eval_model_responses():
     # Generation
     final_json = []
     for i, model_path in enumerate(model_paths):
-        model_answers = async_request_questions(model_raw_prompts, port=7991)#generate_with_vllm_multiprocessing(all_prompts[i], model_path, num_gpus=6)
+        model_answers = async_request_questions(model_raw_prompts, port=7991)  # generate_with_vllm_multiprocessing(all_prompts[i], model_path, num_gpus=6)
         final_json += [{'instruction': raw_prompts[i][j], 'original_answer': model_answers[j]['answer'], 'answer': _postprocess_answer(model_answers[j]['answer']), 'model': model_path} for j in range(len(all_prompts[i]))]
     write_jsonl(final_json, 'final/qwen2_7b_infinity_firefly_crosslogiqa_eval_model_responses.jsonl')
 
@@ -498,7 +499,7 @@ def generate_mmmlu_eval_model_responses():
 
     system_prompt = 'You are a helpful assistant'
     all_prompts = []
-    model_paths = ['/home/users/astar/ares/huangx2/scratch/SimPO/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
+    model_paths = ['/path/to/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
     tokenizers = [AutoTokenizer.from_pretrained(model_path) for model_path in model_paths]
     questions = [ee['instruction'] for e in crossmmlu for ee in e['test'] if ee['id'] in common_ids]
     choices = [['(A): ' + ee['option_a'], '(B): ' + ee['option_b'], '(C): ' + ee['option_c'], '(D): ' + ee['option_d']] for e in crossmmlu for ee in e['test'] if ee['id'] in common_ids]
@@ -556,7 +557,7 @@ def generate_mmmlu_eval_model_responses():
     # Generation
     final_json = []
     for i, model_path in enumerate(model_paths):
-        model_answers = async_request_questions(model_raw_prompts, port=7991) #generate_with_vllm_multiprocessing(all_prompts[i], model_path)
+        model_answers = async_request_questions(model_raw_prompts, port=7991)  # generate_with_vllm_multiprocessing(all_prompts[i], model_path)
         final_json += [{'instruction': raw_prompts[i][j], 'original_answer': model_answers[j]['answer'], 'answer': _postprocess_answer(model_answers[j]['answer']), 'model': model_path} for j in range(len(all_prompts[i]))]
     write_jsonl(final_json, 'final/qwen2_7b_infinity_firefly_mmmlu_eval_model_responses.jsonl')
 
@@ -570,7 +571,7 @@ def generate_crossmmlu_eval_model_responses():
 
     system_prompt = 'You are a helpful assistant'
     all_prompts = []
-    model_paths = ['/home/users/astar/ares/huangx2/scratch/SimPO/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
+    model_paths = ['/path/to/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
     questions = [e['English']['question'] for e in crossmmlu] + [e['Chinese']['question'] for e in crossmmlu] + [e['Indonesian']['question'] for e in crossmmlu]
     choices = [e['English']['choices'] for e in crossmmlu] + [e['Chinese']['choices'] for e in crossmmlu] + [e['Indonesian']['choices'] for e in crossmmlu]
     n = len(questions)
@@ -620,8 +621,8 @@ def generate_crossmmlu_eval_model_responses():
     # Generation
     final_json = []
     for i, model_path in enumerate(model_paths):
-        model_answers = async_request_questions(model_raw_prompts, port=7991) #generate_with_vllm_multiprocessing(all_prompts[i], model_path)
-        final_json += [{'instruction': raw_prompts[i][j], 'original_answer': model_answers[j]['answer'], 'answer': _postprocess_answer(model_answers[j]['answer']), 'model': model_path} for j in range(len(all_prompts[i]))]
+        model_answers = async_request_questions(model_raw_prompts, port=7991)  # generate_with_vllm_multiprocessing(all_prompts[i], model_path)
+        final_json += [{'instruction': raw_prompts[i][j], 'original_answer': model_answers[j]['answer'], 'answer': _postprocess_answer(model_answers[j]['answer']), 'model': model_path} for j in range(len(raw_prompts[i]))]
     write_jsonl(final_json, 'final/qwen2_7b_infinity_firefly_crossmmlu_eval_model_responses.jsonl')
 
 
@@ -728,8 +729,6 @@ def extract_and_eval_mmmlu_ans():
     crossmmlu_answers = [f'{ee["answer"].upper()}' for e in crossmmlu for ee in e['test'] if ee['id'] in common_ids]
     crossmmlu_choices = [[f'({eee.upper()}): {ee["option_%s" % eee]}' for eee in ['a', 'b', 'c', 'd']] for e in crossmmlu for ee in e['test'] if ee['id'] in common_ids]
     
-    # eval_paths = ['final/llama3_infinity_firefly_crossmmlu_eval_model_responses.jsonl']
-    # eval_paths = ['final/gemma2_9b_infinity_firefly_mmmlu_eval_model_responses_2.jsonl']
     eval_paths = ['final/qwen2_7b_infinity_firefly_mmmlu_eval_model_responses.jsonl']
     for eval_path in eval_paths:
         generated_answer = read_jsonl(eval_path)
@@ -777,7 +776,6 @@ def extract_and_eval_crosslogiqa_ans():
     crosslogiqa_answers = [e.replace('(', '').replace(')', '')[:1] for e in crosslogiqa_answers]
     crosslogiqa_choices = [e['English']['choices'] for e in crosslogiqa] + [e['Chinese']['choices'] for e in crosslogiqa] + [e['Indonesian']['choices'] for e in crosslogiqa]
     eval_paths = ['final/qwen2_7b_infinity_firefly_crosslogiqa_eval_model_responses.jsonl']
-    # eval_paths = ['final/llama3_infinity_firefly_crosslogiqa_eval_model_responses.jsonl']
     for eval_path in eval_paths:
         generated_answer = read_jsonl(eval_path)
         EVAL_PROMPT = """Select the most appropriate choice (A, B, C, or D) given the provided answer and choices. Only provide one answer using a single letter response, without any explanations or additional information.
@@ -828,12 +826,7 @@ def generate_indommlu_eval_model_responses():
 
     system_prompt = 'Kamu adalah asisten yang membantu.'
     all_prompts = []
-    # model_paths = ['meta-llama/Llama-3.1-8B-Instruct', '/home/users/astar/ares/huangx2/scratch/SimPO/outputs/llama-3-8b-instruct-gpt-simpo-v2', '/home/users/astar/ares/huangx2/scratch/SimPO/outputs/llama-3-8b-instruct-simpo-v2']
-    # model_paths += ['aisingapore/llama3-8b-cpt-sea-lionv2.1-instruct', 'google/gemma-2-9b-it', 'SeaLLMs/SeaLLMs-v3-7B-Chat']
-    # model_paths = ['princeton-nlp/Llama-3-Instruct-8B-SimPO-v0.2']
-    # model_paths = ['meta-llama/Llama-3.1-8B-Instruct', '/home/users/astar/ares/huangx2/scratch/SimPO/outputs/llama3-8b-infinity-firefly-full-sft-full', '/home/users/astar/ares/huangx2/scratch/SimPO/outputs/llama3-8b-infinity-firefly-score-filter-sft-full']
-    # model_paths = ['Qwen/Qwen2.5-7B-Instruct']
-    model_paths = ['/home/users/astar/ares/huangx2/scratch/SimPO/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
+    model_paths = ['/path/to/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
     tokenizers = [AutoTokenizer.from_pretrained(model_path) for model_path in model_paths]
     questions = list(indommlu['question'])
     choices = list(indommlu['choices'])
@@ -880,7 +873,7 @@ def generate_indommlu_eval_model_responses():
     # Generation
     final_json = []
     for i, model_path in enumerate(model_paths):
-        model_answers = async_request_questions(all_prompts[i], port=7991) #generate_with_vllm_multiprocessing(all_prompts[i], model_path)
+        model_answers = async_request_questions(all_prompts[i], port=7991)  # generate_with_vllm_multiprocessing(all_prompts[i], model_path)
         final_json += [{'instruction': raw_prompts[i][j], 'original_answer': model_answers[j]['answer'], 'answer': _postprocess_answer(model_answers[j]['answer']), 'model': model_path} for j in range(len(all_prompts[i]))]
     write_jsonl(final_json, 'final/qwen2_7b_infinity_firefly_full_score_filter_indommlu_eval_model_responses.jsonl')
 
@@ -895,7 +888,7 @@ def generate_cross_alpaca_eval_model_responses():
 
     system_prompt = 'You are a helpful assistant'
     all_prompts = []
-    model_paths = ['/home/users/astar/ares/huangx2/scratch/SimPO/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
+    model_paths = ['/path/to/outputs/qwen2-5-7b-infinity-firefly-score-filter-sft-full/checkpoint-512']
     tokenizers = [AutoTokenizer.from_pretrained(model_path) for model_path in model_paths]
 
     all_prompts = []
@@ -927,7 +920,7 @@ def generate_cross_alpaca_eval_model_responses():
     model_path = model_paths[0]
     final_json = []
     for port in list(range(7991, 7992)):
-        model_answers = async_request_questions(all_prompts, port=port, max_workers=1024 * 4) #generate_with_vllm_multiprocessing(all_prompts[i], model_path)
+        model_answers = async_request_questions(all_prompts, port=port, max_workers=1024 * 4)  # generate_with_vllm_multiprocessing(all_prompts[i], model_path)
         final_json += [{'instruction': all_prompts[j], 'original_answer': model_answers[j]['answer'], 'answer': postprocess_mcot_answer(model_answers[j]['answer']), 'model': model_path} for j in range(len(all_prompts))]
 
     write_jsonl(final_json, 'final/llama3_8b_mcot_alpaca_eval.jsonl')
@@ -1021,8 +1014,7 @@ def generate_and_eval_mmmlu():
         model_messages.append(messages)
         model_raw_prompts.append(prompt)
 
-    # model_raw_prompts = [e + ' <|answer_should_be|>' for e in model_raw_prompts]
-    answer_choices = async_request_questions(model_raw_prompts, max_workers=1024, port=30000) #8002
+    answer_choices = async_request_questions(model_raw_prompts, max_workers=1024, port=30000)  # 8002
 
     res_data = []
     for i in range(len(answer_choices)):
@@ -1061,7 +1053,6 @@ def generate_and_eval_mmmlu():
 
 
 def generate_and_eval_mtruthfulqa():
-    # splits = ['ar', 'id', 'zh']
     splits = ['ar', 'bn', 'ca', 'da', 'de', 'es', 'eu', 'fr', 'gu', 'hi', 'hr', 'hu', 'hy', 'id', 'it', 'kn', 'ml', 'mr', 'ne', 'nl', 'pt', 'ro', 'ru', 'sk', 'sr', 'sv', 'ta', 'te', 'uk', 'vi', 'zh']
     m_truthfulqa = [load_dataset(r"alexandrainst/m_truthfulqa", s) for s in splits]
 
@@ -1085,8 +1076,14 @@ def generate_and_eval_mtruthfulqa():
         model_messages.append(messages)
         model_raw_prompts.append(prompt)
 
-    # model_raw_prompts = [e + ' <|answer_should_be|>' for e in model_raw_prompts]
-    answer_choices = async_request_questions(model_raw_prompts, is_gemini=False, max_tokens=8192, max_workers=256, port=8000, model_name='meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8') #8002
+    answer_choices = async_request_questions(
+        model_raw_prompts,
+        is_gemini=False,
+        max_tokens=8192,
+        max_workers=256,
+        port=8000,
+        model_name='meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8'
+    )
 
     res_data = []
     for i in range(len(answer_choices)):
@@ -1151,7 +1148,7 @@ def generate_and_eval_truthfulqa():
         model_raw_prompts.append(prompt)
 
     model_raw_prompts = [e + ' <|answer_should_be|>' for e in model_raw_prompts]
-    answer_choices = async_request_questions(model_raw_prompts, max_workers=1024, port=7991) #8002
+    answer_choices = async_request_questions(model_raw_prompts, max_workers=1024, port=7991)  # 8002
 
     res_data = []
     for i in range(len(answer_choices)):
@@ -1210,9 +1207,7 @@ def generate_and_eval_fullmmlu():
         model_messages.append(messages)
         model_raw_prompts.append(prompt)
 
-    # model_raw_prompts = [e + ' <|answer_should_be|>' for e in model_raw_prompts]
-
-    answer_choices = async_request_questions(model_raw_prompts, max_workers=256, port=30000) #8002
+    answer_choices = async_request_questions(model_raw_prompts, max_workers=256, port=30000)  # 8002
 
     res_data = []
     for i in range(len(answer_choices)):
@@ -1287,46 +1282,39 @@ def extract_aime_answer(text: str) -> int:
     # If we cannot parse any integer, return sentinel
     return -1
 
+
 def generate_and_eval_aime_2024():
     # 1. Load the dataset
     aime_2024 = load_dataset("Maxwell-Jia/AIME_2024", split='train')
-    # aime_2024 = load_dataset('opencompass/AIME2025', 'AIME2025-I', split='test')
     questions = [e['Problem'] for e in aime_2024]
     answers = [e['Answer'] for e in aime_2024]
-    # questions = [e['question'] for e in aime_2024]
-    # answers = [e['answer'] for e in aime_2024]
     n = len(questions)
 
-    # 2. Build prompts for the LLM
-    # We give the model a clear instruction: 
     NEW_AIME_PROMPT = r"""Problem: %s
 
 Please write your final numerical answer in the form of \boxed{xx}
 """
-
-    # Build the actual prompts for each question
     model_raw_prompts = [NEW_AIME_PROMPT % q for q in questions]
 
-    # 3. Request answers from the model
-    #    This should return a list of dicts: [{"index": i, "answer": "..."}, ...]
-    answer_choices = async_request_questions(model_raw_prompts, max_tokens=65535, max_workers=30, port=30000, model_name='/home/users/astar/ares/huangx2/scratch/gemma3-12b-open-thinking-it2')
+    answer_choices = async_request_questions(
+        model_raw_prompts,
+        max_tokens=65535,
+        max_workers=30,
+        port=30000,
+        model_name='/path/to/gemma3-12b-open-thinking-it2'
+    )
 
-    # 4. Postprocess + store results
     res_data = []
     gold_ans = []
     for i in range(len(answer_choices)):
         row = answer_choices[i]
-        # "answer" is the raw output from the LLM
         raw_llm_output = row.pop('answer')
-        # Optionally strip chain-of-thought or any extraneous text
         llm_output_cleaned = postprocess_thinking_answer(raw_llm_output)
         row['given_answer'] = llm_output_cleaned
         row.pop('index', None)
-        # Add the gold answer
         gold_ans.append(answers[i])
         res_data.append(row)
 
-    # 5. Evaluate: parse the final numeric answer from the model's text and compare
     eval_scores = []
     wrong_count = 0
 
@@ -1344,7 +1332,6 @@ Please write your final numerical answer in the form of \boxed{xx}
         if not is_correct:
             wrong_count += 1
 
-    # 6. Print overall stats
     accuracy = np.mean(eval_scores)
     print(f"Total questions: {len(eval_scores)}")
     print(f"Wrong answers: {wrong_count}")
@@ -1354,34 +1341,31 @@ Please write your final numerical answer in the form of \boxed{xx}
 
 
 def generate_and_eval_gpqa_diamond_mcq():
-    # 1. Load the dataset
     gpqa_diamond = load_dataset('hendrydong/gpqa_diamond_mc', split='test')
     questions = [e['problem'] for e in gpqa_diamond]
     answers = [e['solution'] for e in gpqa_diamond]
 
-    # Build the actual prompts for each question
     model_raw_prompts = [q for q in questions]
 
-    # 3. Request answers from the model
-    #    This should return a list of dicts: [{"index": i, "answer": "..."}, ...]
-    answer_choices = async_request_questions(model_raw_prompts, max_tokens=32768, max_workers=200, port=8000, model_name='/home/users/astar/ares/huangx2/scratch/gemma3-12b-am-2560-inst')
+    answer_choices = async_request_questions(
+        model_raw_prompts,
+        max_tokens=32768,
+        max_workers=200,
+        port=8000,
+        model_name='/path/to/gemma3-12b-am-2560-inst'
+    )
 
-    # 4. Postprocess + store results
     res_data = []
     gold_ans = []
     for i in range(len(answer_choices)):
         row = answer_choices[i]
-        # "answer" is the raw output from the LLM
         raw_llm_output = row.pop('answer')
-        # Optionally strip chain-of-thought or any extraneous text
         llm_output_cleaned = postprocess_thinking_answer(raw_llm_output)
         row['given_answer'] = llm_output_cleaned
         row.pop('index', None)
-        # Add the gold answer
         gold_ans.append(answers[i])
         res_data.append(row)
 
-    # 5. Evaluate: parse the final numeric answer from the model's text and compare
     eval_scores = []
     wrong_count = 0
 
@@ -1395,15 +1379,11 @@ def generate_and_eval_gpqa_diamond_mcq():
         if not is_correct:
             wrong_count += 1
 
-    # 6. Print overall stats
     accuracy = np.mean(eval_scores)
     print(f"Total questions: {len(eval_scores)}")
     print(f"Wrong answers: {wrong_count}")
     print(f"Accuracy: {accuracy:.3f}")
     print('Done with evaluation.')
-
-
-
 
 
 def generate_and_eval_bfcl_v3():
@@ -1412,20 +1392,23 @@ def generate_and_eval_bfcl_v3():
     all_messages = [eval(e['chat_completion_input']) for e in bfcl]
     answers = [e['ground_truth'] for e in bfcl]
     n = len(all_messages)
-    raw_prompts = []
     model_messages = []
     for i in tqdm(range(n)):
         messages = all_messages[i]
         model_messages.append(messages)
 
-    # model_raw_prompts = [e + ' <|answer_should_be|>' for e in model_raw_prompts]
-
-    answer_choices = async_request_questions(model_messages, is_simple_message=False, max_tokens=16384, max_workers=64, port=8000, model_name='google/gemma-3-27b-it') #8002
+    answer_choices = async_request_questions(
+        model_messages,
+        is_simple_message=False,
+        max_tokens=16384,
+        max_workers=64,
+        port=8000,
+        model_name='google/gemma-3-27b-it'
+    )
 
     res_data = []
     for i in range(len(answer_choices)):
         crossmmlu_row = answer_choices[i]
-        # crossmmlu_row['think'] = crossmmlu_row['answer'][:crossmmlu_row['answer'].index(':')] if ':' in crossmmlu_row['answer'] else ''
         crossmmlu_row['given_answer'] = postprocess_thinking_answer(crossmmlu_row.pop('answer'))
         crossmmlu_row.pop('index')
         crossmmlu_row['reference_answer'] = answers[i % len(answers)]
@@ -1469,27 +1452,18 @@ def generate_and_eval_crossmmlu():
     answers = [e['English']['answer'] for e in crossmmlu] + [e['Chinese']['answer'] for e in crossmmlu] + [e['Indonesian']['answer'] for e in crossmmlu] + [e['Malay']['answer'] for e in crossmmlu]
     choices = [e['English']['choices'] for e in crossmmlu] + [e['Chinese']['choices'] for e in crossmmlu] + [e['Indonesian']['choices'] for e in crossmmlu] + [e['Malay']['choices'] for e in crossmmlu]
     n = len(questions)
-    raw_prompts = []
     model_raw_prompts = []
-    model_messages = []
     for i in tqdm(range(n)):
         question = questions[i]
         choice_str = '\n'.join(choices[i])
         prompt = '%s\n\n%s' % (question, choice_str)
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        model_messages.append(messages)
         model_raw_prompts.append(prompt)
 
-    # model_raw_prompts = [e + ' <|answer_should_be|>' for e in model_raw_prompts]
-
-    answer_choices = async_request_questions(model_raw_prompts, max_tokens=30000, enable_thinking=False, max_workers=128, port=8000, model_name='Qwen/Qwen3-32B') #8002
+    answer_choices = async_request_questions(model_raw_prompts, max_tokens=30000, enable_thinking=False, max_workers=128, port=8000, model_name='Qwen/Qwen3-32B')
 
     res_data = []
     for i in range(len(answer_choices)):
         crossmmlu_row = answer_choices[i]
-        # crossmmlu_row['think'] = crossmmlu_row['answer'][:crossmmlu_row[''].index(':')] if ':' in crossmmlu_row['answer'] else ''
         crossmmlu_row['given_answer'] = postprocess_thinking_answer(crossmmlu_row.pop('answer'))
         crossmmlu_row.pop('index')
         crossmmlu_row['choices'] = choices[i % len(answers)]
@@ -1534,28 +1508,19 @@ def generate_and_eval_crosslogiqa():
     answers = [e['English']['answer'] for e in crosslogiqa] + [e['Chinese']['answer'] for e in crosslogiqa] + [e['Indonesian']['answer'] for e in crosslogiqa]
     choices = [e['English']['choices'] for e in crosslogiqa] + [e['Chinese']['choices'] for e in crosslogiqa] + [e['Indonesian']['choices'] for e in crosslogiqa]
     n = len(questions)
-    raw_prompts = []
     model_raw_prompts = []
-    model_messages = []
     for i in tqdm(range(n)):
         question = questions[i]
         context = contexts[i]
         choice_str = '\n'.join(choices[i])
         prompt = 'Paragraph:%s\n\nQuestion:%s\n\nChoices:\n%s' % (context, question, choice_str)
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        model_messages.append(messages)
         model_raw_prompts.append(prompt)
 
-    # model_raw_prompts = [e + ' <|answer_should_be|>' for e in model_raw_prompts]
-    system_prompt = ''
-    answer_choices = async_request_questions(model_raw_prompts, max_tokens=30000, enable_thinking=False, max_workers=128, port=8000, model_name='Qwen/Qwen3-32B') #8002
+    answer_choices = async_request_questions(model_raw_prompts, max_tokens=30000, enable_thinking=False, max_workers=128, port=8000, model_name='Qwen/Qwen3-32B')
 
     res_data = []
     for i in range(len(answer_choices)):
         crossmmlu_row = answer_choices[i]
-        # crossmmlu_row['think'] = crossmmlu_row['answer'][:crossmmlu_row['answer'].index(':')] if ':' in crossmmlu_row['answer'] else ''
         crossmmlu_row['given_answer'] = postprocess_mcot_answer(crossmmlu_row.pop('answer'))
         crossmmlu_row.pop('index')
         crossmmlu_row['choices'] = choices[i % len(answers)]
@@ -1601,21 +1566,14 @@ def generate_and_eval_indommlu():
     answers = [e['answer'] for e in indommlu]
     choices = [e['choices'] for e in indommlu]
     n = len(questions)
-    raw_prompts = []
     model_raw_prompts = []
-    model_messages = []
     for i in tqdm(range(n)):
         question = questions[i]
         choice_str = '\n'.join(choices[i])
         prompt = 'Question:%s\n\nChoices:\n%s' % (question, choice_str)
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        model_messages.append(messages)
         model_raw_prompts.append(prompt)
 
-    system_prompt = ''
-    answer_choices = async_request_questions(model_raw_prompts, enable_thinking=False, max_tokens=12288, system_prompt=system_prompt, model_name='Qwen/Qwen3-235B-A22B', max_workers=512, port=8000) #8002
+    answer_choices = async_request_questions(model_raw_prompts, enable_thinking=False, max_tokens=12288, system_prompt='', model_name='Qwen/Qwen3-235B-A22B', max_workers=512, port=8000)
 
     res_data = []
     for i in range(len(answer_choices)):
@@ -1662,7 +1620,7 @@ def generate_and_eval_bmlama53():
     tags = ['en', 'zh', 'id', 'ms']
     languages = ['English', 'Chinese', 'Indonesian', 'Malay']
     for tag in tags:
-        all_tsvs[tag] = pd.read_csv('/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/data/BMLAMA53/%s.tsv' % tag, sep='\t')
+        all_tsvs[tag] = pd.read_csv('/path/to/SyncInstructions/data/BMLAMA53/%s.tsv' % tag, sep='\t')
 
     desc_options = ['Options', '选项', 'Pilihan', 'Pilihan']
     desc_answers = ['Answer', '答案', 'Jawaban', 'Jawapan']
@@ -1688,9 +1646,6 @@ Predicted Answer:
 
 Given a list of choices above, select the index of the choice based on the predicted answer. Only output the index, and nothing else.
 """
-    # rewritten_prompts_req = [REWRITE_TEMPLATE % (languages[i], p) for i, tag in enumerate(tags) for p in list(all_tsvs[tag]['Prompt'])]
-    # rewritten_prompts = [a['answer'] for a in async_request_questions(rewritten_prompts_req, max_workers=256, port=7990)]
-    # write_jsonl(rewritten_prompts, 'rewritten_bmlama53.jsonl')
     rewritten_prompts = read_jsonl('rewritten_bmlama53.jsonl')
 
     count = 0
@@ -1719,7 +1674,7 @@ Given a list of choices above, select the index of the choice based on the predi
     all_debug_accs = []
     all_selected_choices = []
     for port in [7990, 7991]:
-        model_answers = async_request_questions(all_prompts, max_workers=128, port=port) #generate_with_vllm_multiprocessing(all_prompts[i], model_path)
+        model_answers = async_request_questions(all_prompts, max_workers=128, port=port)
         all_model_answers.append(model_answers)
         eval_prompts = []
         count = 0
@@ -1779,9 +1734,7 @@ Given a list of choices above, select the index of the choice based on the predi
     import pdb; pdb.set_trace()
     print('error pct:', error_count / count)
     print('------------------------------------------------------------')
-        
 
 
 if __name__ == "__main__":
     generate_and_eval_indommlu()
-
