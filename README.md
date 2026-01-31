@@ -1,4 +1,4 @@
-# AdaMCoT
+# AdaMCoT: Rethinking Cross-Lingual Factual Reasoning through Adaptive Multilingual Chain-of-Thought
 
 This repository contains the **codebase and training data** for the paper:
 
