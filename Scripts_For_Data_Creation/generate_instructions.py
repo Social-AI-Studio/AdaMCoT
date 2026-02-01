@@ -195,7 +195,7 @@ def shard_infinity_gen_r1_datasets():
         shard = dataset.shard(num_shards=num_shards, index=idx)
         
         # Define the output path with the given naming convention
-        output_path = f"/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/infinity_instruct_gen/Infinity-Instruct-{idx}"
+        output_path = f"./SyncInstructions/infinity_instruct_gen/Infinity-Instruct-{idx}"
         
         # Save the shard to disk
         shard.save_to_disk(output_path)
@@ -215,7 +215,7 @@ def shard_open_r1_datasets():
         shard = dataset.shard(num_shards=num_shards, index=idx)
         
         # Define the output path with the given naming convention
-        output_path = f"/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/open_r1_math/OpenR1-Math-220k-{idx}"
+        output_path = f"./SyncInstructions/open_r1_math/OpenR1-Math-220k-{idx}"
         
         # Save the shard to disk
         shard.save_to_disk(output_path)
@@ -235,7 +235,7 @@ def shard_kodcode_v1_datasets():
         shard = dataset.shard(num_shards=num_shards, index=idx)
         
         # Define the output path with the given naming convention
-        output_path = f"/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/kodcode_v1/KodCode-V1-SFT-R1-{idx}"
+        output_path = f"./SyncInstructions/kodcode_v1/KodCode-V1-SFT-R1-{idx}"
         
         # Save the shard to disk
         shard.save_to_disk(output_path)
@@ -286,7 +286,7 @@ def generate_infinity_gen_r1_datasets(indices):
         return messages
 
     def get_processed_conversations(shard_index):
-        dataset = load_from_disk('/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/infinity_instruct_gen/Infinity-Instruct-%d' % shard_index)
+        dataset = load_from_disk('./SyncInstructions/infinity_instruct_gen/Infinity-Instruct-%d' % shard_index)
 
         processed_conversations = []
         # Iterate over the dataset
@@ -307,7 +307,7 @@ def generate_infinity_gen_r1_datasets(indices):
         # print(json.dumps(processed_conversations[:3], indent=2, ensure_ascii=False))
         j_start = save_every if idx == 0 else 0
         for s_idx in range(j_start, len(convs), save_every):
-            save_path = '/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/infinity_instruct_gen/output_infinity_instruct_gen_%d_%d.jsonl' % (idx, s_idx)
+            save_path = './SyncInstructions/infinity_instruct_gen/output_infinity_instruct_gen_%d_%d.jsonl' % (idx, s_idx)
             if os.path.exists(save_path):
                 continue
             subset_convs = convs[s_idx: s_idx+save_every]
@@ -317,7 +317,7 @@ def generate_infinity_gen_r1_datasets(indices):
 
 def generate_open_r1_datasets(indices):
     def get_processed_conversations(shard_index):
-        dataset = load_from_disk('/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/open_r1_math/OpenR1-Math-220k-%d' % shard_index)
+        dataset = load_from_disk('./SyncInstructions/open_r1_math/OpenR1-Math-220k-%d' % shard_index)
 
         processed_conversations = []
         # Iterate over the dataset
@@ -338,7 +338,7 @@ def generate_open_r1_datasets(indices):
         # print(json.dumps(processed_conversations[:3], indent=2, ensure_ascii=False))
         j_start = 0
         for s_idx in range(j_start, len(convs), save_every):
-            save_path = '/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/open_r1_math/output_open_r1_math_gen_%d_%d.jsonl' % (idx, s_idx)
+            save_path = './SyncInstructions/open_r1_math/output_open_r1_math_gen_%d_%d.jsonl' % (idx, s_idx)
             if os.path.exists(save_path):
                 continue
             subset_convs = convs[s_idx: s_idx+save_every]
@@ -348,7 +348,7 @@ def generate_open_r1_datasets(indices):
 
 def generate_kod_code_v1_datasets(indices):
     def get_processed_conversations(shard_index):
-        dataset = load_from_disk('/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/kodcode_v1/KodCode-V1-SFT-R1-%d' % shard_index)
+        dataset = load_from_disk('./SyncInstructions/kodcode_v1/KodCode-V1-SFT-R1-%d' % shard_index)
 
         processed_conversations = []
         # Iterate over the dataset
@@ -369,7 +369,7 @@ def generate_kod_code_v1_datasets(indices):
         # print(json.dumps(processed_conversations[:3], indent=2, ensure_ascii=False))
         j_start = 0
         for s_idx in range(j_start, len(convs), save_every):
-            save_path = '/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/kodcode_v1/output_kodcode_v1_gen_%d_%d.jsonl' % (idx, s_idx)
+            save_path = './SyncInstructions/kodcode_v1/output_kodcode_v1_gen_%d_%d.jsonl' % (idx, s_idx)
             if os.path.exists(save_path):
                 continue
             subset_convs = convs[s_idx: s_idx+save_every]
@@ -423,7 +423,7 @@ def generate_open_thoughts_datasets(indices):
         j_start = 0
         for s_idx in range(j_start, len(convs), save_every):
             # Define the output path
-            output_dir = '/home/users/astar/ares/huangx2/scratch/huang_xin/SyncInstructions/open_thoughts'
+            output_dir = './scratch/huang_xin/SyncInstructions/open_thoughts'
             save_path = os.path.join(output_dir, f'output_open_thoughts_gen_{idx}_{s_idx}.jsonl')
 
             # Ensure the output directory exists
